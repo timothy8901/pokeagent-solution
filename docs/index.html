@@ -7,215 +7,137 @@
     <meta name="author" content="Junik Bae">
 
     <!-- Open Graph meta tags -->
-    <meta property="og:title" content="PokéAgent Challenge - VLM-based RL Speedrunning">
-    <meta property="og:description" content="1st Place NeurIPS 2025 PokéAgent Challenge - Expert-Guided RL">
+    <meta property="og:title" content="Solving a 40-Minute Game with RL">
+    <meta property="og:description" content="1st Place Solution for NeurIPS 2025 Pokémon Emerald Speedrunning Challenge">
     <meta property="og:image" content="static/images/emerald.png">
     <meta property="og:type" content="website">
 
-    <title>PokéAgent Challenge - VLM-based Code Generation & Expert-Guided RL</title>
+    <title>Solving a 40-Minute Game with RL | NeurIPS 2025 PokéAgent Challenge</title>
 
     <link rel="stylesheet" href="static/css/main.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <!-- Hero Section -->
-    <section class="hero">
+    <header class="hero">
         <div class="hero-background">
             <img src="static/images/emerald.png" alt="Pokemon Emerald" class="hero-bg-img">
             <div class="hero-overlay"></div>
         </div>
         <div class="hero-content">
-            <h1 class="hero-title">PokéAgent Challenge</h1>
-            <p class="hero-subtitle">AI Agent Playing Pokémon Emerald with VLM-based Code Generation<br>and Expert-Guided Reinforcement Learning</p>
-            <div class="hero-buttons">
-                <a href="https://github.com/heatz123/pokeagent-solution" class="btn btn-primary" target="_blank">
-                    <i class="fab fa-github"></i> GitHub Repository
-                </a>
-                <a href="https://www.youtube.com/@Heatzheatzheatz" class="btn btn-secondary" target="_blank">
-                    <i class="fab fa-youtube"></i> YouTube Demos
-                </a>
-                <a href="https://pokeagent.github.io/" class="btn btn-tertiary" target="_blank">
-                    <i class="fas fa-trophy"></i> NeurIPS 2025 Challenge
-                </a>
-            </div>
-            <div class="hero-badge">
-                <span class="badge-gold"><i class="fas fa-medal"></i> 1st Place</span>
-                <span class="badge-info">NeurIPS 2025 PokéAgent Challenge</span>
-            </div>
+            <p class="hero-badge">1st Place — NeurIPS 2025 PokéAgent Challenge</p>
+            <h1 class="hero-title">Solving a 40-Minute Game with RL</h1>
+            <p class="hero-subtitle">1st Place Solution for NeurIPS 2025 Pokémon Emerald Speedrunning Challenge</p>
             <p class="hero-author">Junik Bae, Seoul National University</p>
-        </div>
-    </section>
-
-    <!-- Abstract Section -->
-    <section class="section section-abstract">
-        <div class="container">
-            <h2 class="section-title">Abstract</h2>
-            <div class="abstract-content">
-                <p>
-                    We present a <strong>knowledge-based, expert-guided reinforcement learning approach</strong> for playing Pokémon Emerald.
-                    Our method externalizes the game knowledge of a Vision-Language Model (VLM) into <strong>Python code expert policies</strong>,
-                    which serve as teachers for training pixel-based neural network agents.
-                </p>
-                <p>
-                    The trained agent ranked <strong class="highlight">1st place</strong> on the NeurIPS 2025 PokéAgent Challenge Speedrun track,
-                    achieving the first gym (Roxanne) in <strong class="highlight">40 minutes and 13 seconds</strong> — without complex reward
-                    engineering or large-scale human demonstrations.
-                </p>
+            <div class="hero-links">
+                <a href="https://github.com/heatz123/pokeagent-solution" target="_blank">GitHub</a>
+                <span class="separator">·</span>
+                <a href="https://www.youtube.com/@Heatzheatzheatz" target="_blank">YouTube</a>
+                <span class="separator">·</span>
+                <a href="https://pokeagent.github.io/" target="_blank">Challenge Page</a>
             </div>
         </div>
-    </section>
+    </header>
 
-    <!-- Demo Videos Section -->
-    <section class="section section-videos">
-        <div class="container">
-            <h2 class="section-title">Agent Demonstrations</h2>
-            <p class="section-description">Watch our trained agent speedrun through Pokémon Emerald</p>
+    <main class="content">
+        <!-- Demo Videos Section -->
+        <section class="section">
+            <h2>Agent Demonstrations</h2>
+            <p class="section-intro">Watch our trained agent speedrun through Pokémon Emerald. The agent operates purely on raw pixels without any VLM at inference time.</p>
 
-            <div class="videos-grid">
-                <div class="video-card">
-                    <div class="video-container">
-                        <video controls preload="metadata">
-                            <source src="static/videos/final1_2x.mp4" type="video/mp4">
-                            Your browser does not support the video tag.
-                        </video>
-                    </div>
-                    <div class="video-caption">
-                        <h3>ROUTE101_TO_OLDALE</h3>
-                        <p>RL agent discovers more efficient routing and autonomously selects RUN to skip unnecessary wild battles</p>
-                        <p class="video-meta"><i class="fas fa-clock"></i> 2x speed</p>
-                    </div>
+            <div class="video-grid">
+                <div class="video-item">
+                    <video controls preload="metadata">
+                        <source src="static/videos/final1_2x.mp4" type="video/mp4">
+                    </video>
+                    <p class="video-caption"><strong>ROUTE101_TO_OLDALE</strong> — RL agent discovers efficient routing and autonomously selects RUN to skip wild battles (2x speed)</p>
                 </div>
 
-                <div class="video-card">
-                    <div class="video-container">
-                        <video controls preload="metadata">
-                            <source src="static/videos/final2_2x.mp4" type="video/mp4">
-                            Your browser does not support the video tag.
-                        </video>
-                    </div>
-                    <div class="video-caption">
-                        <h3>EXIT_BIRCH_LAB</h3>
-                        <p>Agent learns to skip the Pokémon nickname input UI through emergent behavior discovery</p>
-                        <p class="video-meta"><i class="fas fa-clock"></i> 2x speed</p>
-                    </div>
+                <div class="video-item">
+                    <video controls preload="metadata">
+                        <source src="static/videos/final2_2x.mp4" type="video/mp4">
+                    </video>
+                    <p class="video-caption"><strong>EXIT_BIRCH_LAB</strong> — Agent learns to skip the Pokémon nickname input UI through emergent behavior (2x speed)</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Problem Definition Section -->
+        <section class="section">
+            <h2>The Challenge</h2>
+            <p class="section-intro">
+                The <a href="https://pokeagent.github.io/" target="_blank">NeurIPS 2025 PokéAgent Challenge</a> asks:
+                <em>Can we build an AI agent that speedruns Pokémon Emerald?</em>
+            </p>
+
+            <p>This is a uniquely difficult problem for two reasons:</p>
+
+            <ul class="challenge-list">
+                <li><strong>Long-horizon task</strong> — Reaching the first gym takes ~40 minutes of optimal play, requiring thousands of sequential decisions</li>
+                <li><strong>Requires near-optimal actions</strong> — Speedrunning demands efficiency; suboptimal actions compound into significant time loss</li>
+            </ul>
+        </section>
+
+        <!-- Existing Approaches Section -->
+        <section class="section">
+            <h2>Why Existing Approaches Fall Short</h2>
+
+            <div class="approach-comparison">
+                <div class="approach-item">
+                    <h3>LLM/VLM Agents</h3>
+                    <ul>
+                        <li class="pro">Can generate high-level plans and understand game context</li>
+                        <li class="con">Often suboptimal at low-level control</li>
+                        <li class="con">High inference latency makes real-time play impractical</li>
+                    </ul>
+                </div>
+
+                <div class="approach-item">
+                    <h3>RL Agents</h3>
+                    <ul>
+                        <li class="con">Struggle with long-horizon tasks and sparse rewards</li>
+                        <li class="pro">Can achieve near-optimal performance with sufficient training</li>
+                        <li class="pro">Fast inference enables real-time play</li>
+                    </ul>
                 </div>
             </div>
 
-            <div class="youtube-link">
-                <a href="https://www.youtube.com/@Heatzheatzheatz" target="_blank" class="btn btn-youtube">
-                    <i class="fab fa-youtube"></i> Watch More on YouTube
-                </a>
-            </div>
-        </div>
-    </section>
+            <p class="key-question">Can we combine the strengths of both?</p>
+        </section>
 
-    <!-- Key Features Section -->
-    <section class="section section-features">
-        <div class="container">
-            <h2 class="section-title">Key Features</h2>
+        <!-- Our Approach Section -->
+        <section class="section">
+            <h2>Our Approach: VLM Code Expert + Expert-Guided RL</h2>
 
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-code"></i>
-                    </div>
-                    <h3>VLM Code Generation</h3>
-                    <p>Generate Python expert policies using Vision-Language Models (GPT-4o, Gemini 2.5)</p>
-                </div>
+            <p>We propose a pipeline that uses VLMs as <em>teachers</em> rather than <em>players</em>:</p>
 
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-graduation-cap"></i>
-                    </div>
-                    <h3>Expert-Guided RL</h3>
-                    <p>DAgger-style imitation learning combined with Double DQN reinforcement learning</p>
-                </div>
+            <ol class="approach-steps">
+                <li>
+                    <strong>Milestone Decomposition</strong> — Break the long-horizon game into manageable subgoals (e.g., "exit house", "reach Route 101", "defeat Roxanne")
+                </li>
+                <li>
+                    <strong>VLM Code Expert Generation</strong> — For each milestone, prompt a VLM (GPT-4o, Gemini 2.5) to generate Python code that solves the task using game state information
+                </li>
+                <li>
+                    <strong>Expert-Guided Policy Learning</strong> — Use the code experts to guide RL training:
+                    <ul>
+                        <li><strong>DAgger</strong> — Collect expert demonstrations on the learner's state distribution</li>
+                        <li><strong>Double DQN</strong> — Reinforce successful behaviors and improve beyond the expert baseline</li>
+                    </ul>
+                </li>
+                <li>
+                    <strong>Pure Pixel Policy</strong> — The final agent is a CNN that maps raw pixels → actions, with no VLM at inference time
+                </li>
+            </ol>
 
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-brain"></i>
-                    </div>
-                    <h3>Pure Pixel Neural Network</h3>
-                    <p>Final agent operates purely on raw pixels without VLM at inference time</p>
-                </div>
+            <p>This approach combines VLM's game knowledge with RL's ability to optimize for speed — without the latency cost of running a VLM during gameplay.</p>
+        </section>
 
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-list-check"></i>
-                    </div>
-                    <h3>Milestone-Based Curriculum</h3>
-                    <p>Decompose long-horizon gameplay into manageable subgoals with clear success criteria</p>
-                </div>
-
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-lightbulb"></i>
-                    </div>
-                    <h3>Emergent Behaviors</h3>
-                    <p>Agent discovers strategies beyond expert code: battle skipping, efficient routing</p>
-                </div>
-
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
-                    <h3>No Reward Engineering</h3>
-                    <p>Simple sparse rewards with VLM guidance - no complex reward shaping required</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Methodology Section -->
-    <section class="section section-methodology">
-        <div class="container">
-            <h2 class="section-title">Methodology</h2>
-
-            <div class="methodology-pipeline">
-                <h3>Pipeline Overview</h3>
-                <div class="pipeline-steps">
-                    <div class="pipeline-step">
-                        <div class="step-number">1</div>
-                        <h4>Milestone Decomposition</h4>
-                        <p>Break down long-horizon game into subgoals with clear start states and success criteria</p>
-                    </div>
-
-                    <div class="pipeline-arrow">→</div>
-
-                    <div class="pipeline-step">
-                        <div class="step-number">2</div>
-                        <h4>VLM Code Expert Generation</h4>
-                        <p>Vision-Language Model analyzes game state and generates Python code to solve each milestone</p>
-                    </div>
-
-                    <div class="pipeline-arrow">→</div>
-
-                    <div class="pipeline-step">
-                        <div class="step-number">3</div>
-                        <h4>Expert-Guided Policy Learning</h4>
-                        <p><strong>DAgger:</strong> Collect expert demonstrations on-policy<br>
-                           <strong>DDQN:</strong> Reinforce and improve beyond expert baseline</p>
-                    </div>
-
-                    <div class="pipeline-arrow">→</div>
-
-                    <div class="pipeline-step">
-                        <div class="step-number">4</div>
-                        <h4>Pure CNN Policy</h4>
-                        <p>Final agent: raw pixels → actions (no VLM at inference)</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Results Section -->
-    <section class="section section-results">
-        <div class="container">
-            <h2 class="section-title">Results</h2>
+        <!-- Results Section -->
+        <section class="section">
+            <h2>Results</h2>
 
             <h3>NeurIPS 2025 PokéAgent Challenge Leaderboard</h3>
-            <div class="leaderboard-table">
+            <div class="table-wrapper">
                 <table>
                     <thead>
                         <tr>
@@ -226,20 +148,20 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr class="rank-1">
-                            <td><span class="medal gold">🥇 1st</span></td>
+                        <tr class="highlight-row">
+                            <td>🥇 1st</td>
                             <td><strong>Ours</strong></td>
                             <td>VLM Code Expert + Expert-Guided RL</td>
                             <td><strong>40:13</strong></td>
                         </tr>
                         <tr>
-                            <td><span class="medal silver">🥈 2nd</span></td>
+                            <td>🥈 2nd</td>
                             <td>Hamburg PokeRunners</td>
-                            <td>PPO with recurrent network (reward shaping)</td>
+                            <td>PPO with recurrent network</td>
                             <td>01:14:43</td>
                         </tr>
                         <tr>
-                            <td><span class="medal bronze">🥉 3rd</span></td>
+                            <td>🥉 3rd</td>
                             <td>anthonys</td>
                             <td>Tool-Calling VLM Policy</td>
                             <td>01:29:17</td>
@@ -249,111 +171,70 @@
             </div>
 
             <h3>Quantitative Analysis</h3>
-            <div class="results-grid">
-                <div class="result-card">
-                    <h4>LITTLEROOT_TO_ROUTE101 Milestone</h4>
-                    <table class="results-table">
+            <p>Expert-guided RL significantly outperforms both naive RL and expert-only baselines:</p>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
                         <tr>
-                            <td>Naive RL</td>
-                            <td class="result-fail">timeout (failed)</td>
+                            <th>Milestone</th>
+                            <th>Naive RL</th>
+                            <th>Expert-only</th>
+                            <th>Expert-guided RL</th>
                         </tr>
+                    </thead>
+                    <tbody>
                         <tr>
-                            <td>Expert-only</td>
+                            <td>LITTLEROOT_TO_ROUTE101</td>
+                            <td class="fail">timeout</td>
                             <td>90.15 steps (±33.7)</td>
-                        </tr>
-                        <tr class="result-best">
-                            <td><strong>Expert-guided RL</strong></td>
-                            <td><strong>55.75 steps (±12.9) ✨</strong></td>
-                        </tr>
-                    </table>
-                </div>
-
-                <div class="result-card">
-                    <h4>EXIT_BIRCH_LAB Milestone</h4>
-                    <table class="results-table">
-                        <tr>
-                            <td>Naive RL</td>
-                            <td class="result-fail">timeout (failed)</td>
+                            <td class="best"><strong>55.75 steps (±12.9)</strong></td>
                         </tr>
                         <tr>
-                            <td>Expert-only</td>
+                            <td>EXIT_BIRCH_LAB</td>
+                            <td class="fail">timeout</td>
                             <td>64.40 steps (±1.0)</td>
+                            <td class="best"><strong>56.35 steps (±1.1)</strong></td>
                         </tr>
-                        <tr class="result-best">
-                            <td><strong>Expert-guided RL</strong></td>
-                            <td><strong>56.35 steps (±1.1) ✨</strong></td>
-                        </tr>
-                    </table>
-                </div>
+                    </tbody>
+                </table>
             </div>
 
-            <h3>Qualitative Discoveries</h3>
-            <div class="discoveries">
-                <p>The learned RL policy autonomously discovered strategies <strong>not explicitly encoded in the expert code</strong>:</p>
-                <ul class="discoveries-list">
-                    <li><i class="fas fa-check-circle"></i> <strong>Efficient route selection</strong> — avoiding unnecessary detours and optimizing pathfinding</li>
-                    <li><i class="fas fa-check-circle"></i> <strong>Skipping wild battles</strong> — using RUN command to quickly exit encounters</li>
-                    <li><i class="fas fa-check-circle"></i> <strong>Fast-forwarding UI interactions</strong> — nickname input skip via START+A combo</li>
-                </ul>
-            </div>
-        </div>
-    </section>
+            <h3>Emergent Behaviors</h3>
+            <p>The RL agent discovered strategies <em>not explicitly encoded</em> in the expert code:</p>
+            <ul>
+                <li><strong>Efficient route selection</strong> — avoiding unnecessary detours</li>
+                <li><strong>Skipping wild battles</strong> — using RUN to quickly exit encounters</li>
+                <li><strong>UI optimization</strong> — skipping nickname input via START+A combo</li>
+            </ul>
+        </section>
 
-    <!-- Contributions Section -->
-    <section class="section section-contributions">
-        <div class="container">
-            <h2 class="section-title">Key Contributions</h2>
-
-            <div class="contributions-grid">
-                <div class="contribution-card">
-                    <div class="contribution-number">1</div>
-                    <h3>Knowledge-Based Expert-Guided RL Pipeline</h3>
-                    <p>Propose VLM code expert generation for long-horizon pixel games, combining milestone structure, code experts, and RL training</p>
-                </div>
-
-                <div class="contribution-card">
-                    <div class="contribution-number">2</div>
-                    <h3>Practical Alternative to Reward Engineering</h3>
-                    <p>No complex reward shaping required, no large-scale human demonstration collection — simple sparse rewards + VLM guidance</p>
-                </div>
-
-                <div class="contribution-card">
-                    <div class="contribution-number">3</div>
-                    <h3>Competitive Performance</h3>
-                    <p>1st place on NeurIPS 2025 PokéAgent Challenge, faster than human demonstration baselines, with emergent behaviors beyond expert code</p>
-                </div>
-            </div>
-        </div>
-    </section>
+        <!-- Abstract/Summary Section -->
+        <section class="section">
+            <h2>Summary</h2>
+            <p>
+                We present a <strong>knowledge-based, expert-guided reinforcement learning approach</strong> for playing Pokémon Emerald.
+                Our method externalizes the game knowledge of a Vision-Language Model (VLM) into Python code expert policies,
+                which serve as teachers for training pixel-based neural network agents.
+            </p>
+            <p>
+                The trained agent ranked <strong>1st place</strong> on the NeurIPS 2025 PokéAgent Challenge Speedrun track,
+                achieving the first gym (Roxanne) in <strong>40 minutes and 13 seconds</strong> — without complex reward
+                engineering or large-scale human demonstrations.
+            </p>
+        </section>
+    </main>
 
     <!-- Footer -->
     <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>PokéAgent Challenge</h3>
-                    <p>AI Agent for Pokémon Emerald Speedrunning</p>
-                    <p class="copyright">© 2025 Junik Bae, Seoul National University</p>
-                </div>
-
-                <div class="footer-section">
-                    <h3>Links</h3>
-                    <ul class="footer-links">
-                        <li><a href="https://github.com/heatz123/pokeagent-solution" target="_blank"><i class="fab fa-github"></i> GitHub Repository</a></li>
-                        <li><a href="https://www.youtube.com/@Heatzheatzheatz" target="_blank"><i class="fab fa-youtube"></i> YouTube Channel</a></li>
-                        <li><a href="https://pokeagent.github.io/" target="_blank"><i class="fas fa-trophy"></i> NeurIPS 2025 Challenge</a></li>
-                    </ul>
-                </div>
-
-                <div class="footer-section">
-                    <h3>License</h3>
-                    <p><a href="https://github.com/heatz123/pokeagent-solution/blob/main/LICENSE" target="_blank">MIT License</a></p>
-                    <p>Feel free to use and modify with attribution</p>
-                </div>
-            </div>
+        <div class="footer-content">
+            <p>© 2025 Junik Bae, Seoul National University</p>
+            <p>
+                <a href="https://github.com/heatz123/pokeagent-solution" target="_blank">GitHub</a>
+                <span class="separator">·</span>
+                <a href="https://github.com/heatz123/pokeagent-solution/blob/main/LICENSE" target="_blank">MIT License</a>
+            </p>
         </div>
     </footer>
-
-    <script src="static/js/main.js"></script>
 </body>
 </html>
