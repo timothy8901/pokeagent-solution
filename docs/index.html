@@ -108,28 +108,15 @@
         <section class="section">
             <h2>Our Approach: VLM Code Expert + Expert-Guided RL</h2>
 
-            <p>We propose a pipeline that uses VLMs as <em>teachers</em> rather than <em>players</em>:</p>
-
-            <ol class="approach-steps">
-                <li>
-                    <strong>Milestone Decomposition</strong> — Break the long-horizon game into manageable subgoals (e.g., "exit house", "reach Route 101", "defeat Roxanne")
-                </li>
-                <li>
-                    <strong>VLM Code Expert Generation</strong> — For each milestone, prompt a VLM (GPT-4o, Gemini 2.5) to generate Python code that solves the task using game state information
-                </li>
-                <li>
-                    <strong>Expert-Guided Policy Learning</strong> — Use the code experts to guide RL training:
-                    <ul>
-                        <li><strong>DAgger</strong> — Collect expert demonstrations on the learner's state distribution</li>
-                        <li><strong>Double DQN</strong> — Reinforce successful behaviors and improve beyond the expert baseline</li>
-                    </ul>
-                </li>
-                <li>
-                    <strong>Pure Pixel Policy</strong> — The final agent is a CNN that maps raw pixels → actions, with no VLM at inference time
-                </li>
-            </ol>
-
-            <p>This approach combines VLM's game knowledge with RL's ability to optimize for speed — without the latency cost of running a VLM during gameplay.</p>
+            <figure class="method-figure">
+                <img src="static/images/figure1.png" alt="Overview of Scripted Policy Distillation (SPD)">
+                <figcaption>
+                    <strong>Overview of Scripted Policy Distillation (SPD).</strong> Our approach consists of three stages.<br><br>
+                    <strong>(1) Subgoal Generation:</strong> Given a long-horizon task specification, an LLM decomposes the task into sequential subgoals, each paired with an executable success-condition function <code>success_cond(state)</code> that determines task completion.<br><br>
+                    <strong>(2) Scripted Policy Generation:</strong> For each subgoal, the LLM generates a scripted policy that maps states to actions. The policy can invoke a VLM tool (<code>extract_feature</code>) to parse visual information not available in the structured state, and uses logging statements (<code>print(log)</code>) to record execution traces for later analysis. The policy interacts with the environment until <code>success_cond</code> returns true or a timeout occurs. On failure, the LLM analyzes the logged traces and revises either the policy code or the subgoal specification.<br><br>
+                    <strong>(3) Script-Guided RL:</strong> Once all scripted policies succeed reliably, we distill them into neural network policies via supervised learning on expert trajectories, followed by reinforcement learning with expert action guidance. The resulting neural policy exhibits more efficient behavior than policies trained without distillation.
+                </figcaption>
+            </figure>
         </section>
 
         <!-- Results Section -->
