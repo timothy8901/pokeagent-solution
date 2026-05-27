@@ -33,19 +33,24 @@ dependencies = [
     "protobuf!=4.24.0,<5.0.0,>=3.19.6",
     "openai==1.90.0",
     "google-generativeai>=0.3.0",
-    "torch>=2.0.0",
-    "transformers>=4.36.0",
-    "bitsandbytes>=0.41.0",
-    "accelerate>=0.25.0",
-    "sentencepiece>=0.1.99",
     "cffi>=1.6",
     "pytesseract>=0.3.10",
-    "torchvision>=0.23.0",
     "mcp>=1.0.0",
     "beautifulsoup4>=4.12.0",
 ]
 
 [project.optional-dependencies]
+# Local/offline VLM backend (HuggingFace + GPU quantization). NOT needed for the
+# API backends (gemini/openai/openrouter). torch/torchvision/bitsandbytes have no
+# Apple-Silicon builds, so this extra is effectively Linux/Windows + CUDA only.
+local = [
+    "torch>=2.0.0 ; sys_platform != 'darwin'",
+    "torchvision>=0.23.0 ; sys_platform != 'darwin'",
+    "transformers>=4.36.0",
+    "bitsandbytes>=0.41.0 ; sys_platform != 'darwin'",
+    "accelerate>=0.25.0",
+    "sentencepiece>=0.1.99",
+]
 dev = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
@@ -60,8 +65,8 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["agent", "pokemon_env", "utils", "server"]
 
-[tool.uv]
-dev-dependencies = [
+[dependency-groups]
+dev = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
     "ruff>=0.1.0",

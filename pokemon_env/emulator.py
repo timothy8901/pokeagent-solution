@@ -1124,7 +1124,14 @@ class EmeraldEmulator:
                 "ROUTE_104_NORTH", "RUSTBORO_CITY",
 
                 # Phase 7: First Gym Challenge
-                "RUSTBORO_GYM_ENTERED", "ROXANNE_DEFEATED", "FIRST_GYM_COMPLETE"
+                "RUSTBORO_GYM_ENTERED", "ROXANNE_DEFEATED", "FIRST_GYM_COMPLETE",
+
+                # Phase 8: Remaining gyms (detected generically by badge count)
+                "SECOND_BADGE", "THIRD_BADGE", "FOURTH_BADGE", "FIFTH_BADGE",
+                "SIXTH_BADGE", "SEVENTH_BADGE", "EIGHTH_BADGE",
+
+                # Phase 9: League finale — detected via the in-game champion flag (Hall of Fame)
+                "HALL_OF_FAME"
             ]
             
             for milestone_id in milestones_to_check:
@@ -1178,7 +1185,30 @@ class EmeraldEmulator:
                     party = game_state.get("player", {}).get("party", [])
                     return len(party) > 0
                 return False
-            
+
+            # Gym progress detected generically by badge count (gyms 2-8)
+            elif milestone_id in ("SECOND_BADGE", "THIRD_BADGE", "FOURTH_BADGE",
+                                  "FIFTH_BADGE", "SIXTH_BADGE", "SEVENTH_BADGE", "EIGHTH_BADGE"):
+                if not game_state:
+                    return False
+                needed = {"SECOND_BADGE": 2, "THIRD_BADGE": 3, "FOURTH_BADGE": 4,
+                          "FIFTH_BADGE": 5, "SIXTH_BADGE": 6, "SEVENTH_BADGE": 7,
+                          "EIGHTH_BADGE": 8}[milestone_id]
+                badges = game_state.get("game", {}).get("badges")
+                count = len(badges) if isinstance(badges, list) else (badges or 0)
+                return count >= needed
+
+            # Game complete: the champion flag is set upon entering the Hall of Fame
+            elif milestone_id == "HALL_OF_FAME":
+                if not game_state:
+                    return False
+                g = game_state.get("game", {})
+                for c in (g, g.get("flags", {}), game_state.get("player", {}),
+                          game_state.get("player", {}).get("flags", {})):
+                    if isinstance(c, dict) and c.get("is_champion"):
+                        return True
+                return False
+
             # Location-based milestones - check current location
             elif milestone_id == "LITTLEROOT_TOWN":
                 if game_state:

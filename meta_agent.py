@@ -244,9 +244,8 @@ REASONING: The claim seems plausible but the evidence is incomplete. Needs more 
                 elif validation['status'] == 'invalid':
                     status_emoji = "❌"
                     self.kb.delete_by_id(entry_dict['id'])
-                else:  # suspicious
+                else:  # suspicious — recorded but kept (only 'invalid' is deleted)
                     status_emoji = "⚠️"
-                    self.kb.delete_by_id(entry_dict['id'])
 
                 print(f"{status_emoji} Validated {entry_dict['id']}: {validation['status']} ({validation['validity_score']:.2f})")
 

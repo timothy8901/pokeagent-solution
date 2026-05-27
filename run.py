@@ -15,6 +15,14 @@ import signal
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from server.client import run_multiprocess_client
 
+# Per-session journal directory (Obsidian vault by default; override with env or --journal-dir)
+DEFAULT_JOURNAL_DIR = os.environ.get(
+    "POKEAGENT_JOURNAL_DIR",
+    "/Users/tim/Obsidian Vault/obsidian/qwen-pokemon/journal",
+)
+# Savestate written at the end of each timed session, reloaded by --resume
+SESSION_STATE_PATH = ".pokeagent_cache/session_latest.state"
+
 
 def start_server(args):
     """Start the server process with appropriate arguments"""
@@ -126,7 +134,22 @@ def main():
     parser.add_argument("--no-ocr", action="store_true",
                        help="Disable OCR dialogue detection")
 
+    # Timed sessions + cross-session journal continuity
+    parser.add_argument("--session-minutes", type=int, default=60,
+                       help="Play for this many minutes, then save state + write a journal and exit (0 = unlimited)")
+    parser.add_argument("--journal-dir", type=str, default=DEFAULT_JOURNAL_DIR,
+                       help="Directory for per-session journal notes (defaults to the Obsidian vault)")
+    parser.add_argument("--resume", action="store_true",
+                       help=f"Resume from the previous session's savestate ({SESSION_STATE_PATH})")
+
     args = parser.parse_args()
+
+    # Resume from the previous session's savestate if requested (and present)
+    if args.resume and os.path.exists(SESSION_STATE_PATH):
+        args.load_state = SESSION_STATE_PATH
+        print(f"🔄 Resuming from previous session: {SESSION_STATE_PATH}")
+    elif args.resume:
+        print(f"⚠️ --resume requested but {SESSION_STATE_PATH} not found; starting fresh")
     
     print("=" * 60)
     print("🎮 Pokemon Emerald AI Agent")

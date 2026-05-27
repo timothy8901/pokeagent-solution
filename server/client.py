@@ -75,7 +75,72 @@ def run_multiprocess_client(server_port=8000, args=None):
     agent = Agent(args)
     print(f"✅ Agent initialized")
     print(f"🎮 Client connected to server at {server_url}")
-    
+
+    # --- Timed session + cross-session journal continuity ---
+    session_minutes = getattr(args, 'session_minutes', 60) if args else 60
+    session_seconds = session_minutes * 60 if session_minutes and session_minutes > 0 else 0
+    session_start = time.time()
+    journal_dir = getattr(args, 'journal_dir', None) if args else None
+    session_state_path = ".pokeagent_cache/session_latest.state"
+    last_game_state = None
+    session_ended = False
+
+    if journal_dir:
+        try:
+            agent.load_session_journal(journal_dir)
+        except Exception as e:
+            print(f"⚠️ Could not load previous journal: {e}")
+
+    def _is_champion(gs):
+        """True once the player has entered the Hall of Fame (game complete)."""
+        if not gs:
+            return False
+        g = gs.get("game", {})
+        for c in (g, g.get("flags", {}), gs.get("player", {}), gs.get("player", {}).get("flags", {})):
+            if isinstance(c, dict) and c.get("is_champion"):
+                return True
+        return False
+
+    def _fetch_game_state():
+        """Best-effort fetch of a full game_state dict (used if we have none yet)."""
+        try:
+            r = requests.get(f"{server_url}/state", timeout=5)
+            if r.status_code != 200:
+                return None
+            sd = r.json()
+            b64 = sd.get("visual", {}).get("screenshot_base64", "")
+            frame = Image.open(io.BytesIO(base64.b64decode(b64))) if b64 else None
+            return {
+                'frame': frame, 'player': sd.get('player', {}), 'game': sd.get('game', {}),
+                'map': sd.get('map', {}), 'milestones': sd.get('milestones', {}),
+                'visual': sd.get('visual', {}),
+            }
+        except Exception:
+            return None
+
+    def _end_session(reason):
+        """Save a resume savestate and write the session journal, exactly once."""
+        nonlocal session_ended, last_game_state
+        if session_ended:
+            return
+        session_ended = True
+        print(f"\n⏱️ Ending session ({reason}). Saving state + writing journal...")
+        try:
+            requests.post(f"{server_url}/save_state",
+                          json={"filepath": session_state_path}, timeout=10)
+            print(f"💾 Saved resume state: {session_state_path}")
+        except Exception as e:
+            print(f"❌ Save state failed: {e}")
+        if journal_dir:
+            if last_game_state is None:
+                last_game_state = _fetch_game_state()
+            try:
+                path = agent.write_session_journal(journal_dir, last_game_state, session_minutes)
+                if path:
+                    print(f"📝 Journal written: {path}")
+            except Exception as e:
+                print(f"❌ Journal write failed: {e}")
+
     # Display setup
     headless = args and args.headless
     screen = None
@@ -115,6 +180,12 @@ def run_multiprocess_client(server_port=8000, args=None):
     running = True
     while running:
         try:
+            # Timed session: save state + write journal + exit after the configured duration
+            if session_seconds and (time.time() - session_start) >= session_seconds:
+                _end_session(f"{session_minutes} min reached")
+                running = False
+                break
+
             # Auto-display comprehensive state in manual mode (one time)
             if auto_state_timer and time.time() >= auto_state_timer:
                 print("🔍 Auto-displaying comprehensive state in manual mode...")
@@ -348,7 +419,14 @@ def run_multiprocess_client(server_port=8000, args=None):
                                             'status': state_data.get('status', ''),
                                             'action_queue_length': state_data.get('action_queue_length', 0)
                                         }
-                                        
+                                        last_game_state = game_state
+
+                                        # Win condition: stop cleanly once we reach the Hall of Fame
+                                        if _is_champion(game_state):
+                                            _end_session("game complete — Hall of Fame")
+                                            running = False
+                                            break
+
                                         result = agent.step(game_state)
                                         if result and result.get('action'):
                                             # Convert action to buttons list format expected by server

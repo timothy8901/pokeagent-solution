@@ -177,6 +177,245 @@ class MilestoneManager:
             "description": "Receive Stone Badge (first gym badge)",
             "category": "badge",
             "condition": "((len(state.get('game', {}).get('badges', [])) >= 1 or any('Stone' in str(b) for b in state.get('game', {}).get('badges', []))) if isinstance(state.get('game', {}).get('badges', []), list) else state.get('game', {}).get('badges', 0) >= 1) and 'GYM' not in str(state.get('player', {}).get('location', '')).upper()"
+        },
+        # Phase 8: Route to Dewford
+        {
+            "id": "RUSTBORO_CENTER",
+            "description": "Heal at Rustboro Pokemon Center before heading south",
+            "category": "heal",
+            "condition": "'RUSTBORO' in str(state.get('player', {}).get('location', '')).upper() and 'CENTER' in str(state.get('player', {}).get('location', '')).upper()"
+        },
+        {
+            "id": "ROUTE_109_SOUTH",
+            "description": "Travel south on Route 109 to Dewford Town",
+            "category": "location",
+            "condition": "'DEWFORD' in str(state.get('player', {}).get('location', '')).upper() or 'ROUTE_109' in str(state.get('player', {}).get('location', '')).upper()"
+        },
+        {
+            "id": "DEWFORD_TOWN_ARRIVED",
+            "description": "Arrive at Dewford Town",
+            "category": "location",
+            "condition": "'DEWFORD TOWN' in str(state.get('player', {}).get('location', '')).upper()"
+        },
+
+        # Phase 9: Second Gym - Dewford (Wattson - Electric)
+        {
+            "id": "DEWFORD_GYM_ENTERED",
+            "description": "Enter Dewford Gym (Thunder Mountain)",
+            "category": "location",
+            "condition": "'DEWFORD_TOWN_GYM' in str(state.get('player', {}).get('location', '')).upper() or 'DEWFORD GYM' in str(state.get('player', {}).get('location', '')).upper()"
+        },
+        {
+            "id": "WATTSON_DEFEATED",
+            "description": "Defeat Gym Leader Wattson",
+            "category": "battle",
+            "condition": "(len(state.get('game', {}).get('badges', [])) >= 2) if isinstance(state.get('game', {}).get('badges', []), list) else state.get('game', {}).get('badges', 0) >= 2"
+        },
+        {
+            "id": "SECOND_GYM_COMPLETE",
+            "description": "Receive Dynamo Badge (second gym badge)",
+            "category": "badge",
+            "condition": "((len(state.get('game', {}).get('badges', [])) >= 2) if isinstance(state.get('game', {}).get('badges', []), list) else state.get('game', {}).get('badges', 0) >= 2) and 'GYM' not in str(state.get('player', {}).get('location', '')).upper()"
+        },
+
+        # Phase 10: Route to Lavaridge
+        {
+            "id": "ROUTE_109_NORTH",
+            "description": "Travel north on Route 109 toward Lavaridge",
+            "category": "location",
+            "condition": "'ROUTE_109' in str(state.get('player', {}).get('location', '')).upper() or 'HOT_SPRINGS' in str(state.get('player', {}).get('location', '')).upper()"
+        },
+        {
+            "id": "LAVARIDGE_TOWN_ARRIVED",
+            "description": "Arrive at Lavaridge Town",
+            "category": "location",
+            "condition": "'LAVARIDGE' in str(state.get('player', {}).get('location', '')).upper()"
+        },
+        {
+            "id": "LAVARIDGE_GYM_ENTERED",
+            "description": "Enter Lavaridge Gym (Volcanic Cave)",
+            "category": "location",
+            "condition": "'LAVARIDGE_TOWN_GYM' in str(state.get('player', {}).get('location', '')).upper() or 'LAVARIDGE GYM' in str(state.get('player', {}).get('location', '')).upper()"
+        },
+
+        # Phase 11: Third Gym - Lavaridge (Flannery - Fire)
+        {
+            "id": "FLANNERY_DEFEATED",
+            "description": "Defeat Gym Leader Flannery",
+            "category": "battle",
+            "condition": "(len(state.get('game', {}).get('badges', [])) >= 3) if isinstance(state.get('game', {}).get('badges', []), list) else state.get('game', {}).get('badges', 0) >= 3"
+        },
+        {
+            "id": "THIRD_GYM_COMPLETE",
+            "description": "Receive Heat Badge (third gym badge)",
+            "category": "badge",
+            "condition": "((len(state.get('game', {}).get('badges', [])) >= 3) if isinstance(state.get('game', {}).get('badges', []), list) else state.get('game', {}).get('badges', 0) >= 3) and 'GYM' not in str(state.get('player', {}).get('location', '')).upper()"
+        },
+
+        # Phase 12: Route to Pacifidlog
+        {
+            "id": "ROUTE_124_TO_PACIFIDLOG",
+            "description": "Travel via Route 124 to Pacifidlog Town (boat route)",
+            "category": "location",
+            "condition": "'PACIFIDLOG' in str(state.get('player', {}).get('location', '')).upper()"
+        },
+        {
+            "id": "PACIFIDLOG_GYM_ENTERED",
+            "description": "Enter Pacifidlog Gym (Norman - requires Surf)",
+            "category": "location",
+            "condition": "'PACIFIDLOG_TOWN_GYM' in str(state.get('player', {}).get('location', '')).upper() or 'PACIFIDLOG GYM' in str(state.get('player', {}).get('location', '')).upper()"
+        },
+
+        # Phase 13: Fourth Gym - Pacifidlog (Norman - Normal)
+        {
+            "id": "NORMAN_DEFEATED",
+            "description": "Defeat Gym Leader Norman (also known as the Player's Dad)",
+            "category": "battle",
+            "condition": "(len(state.get('game', {}).get('badges', [])) >= 4) if isinstance(state.get('game', {}).get('badges', []), list) else state.get('game', {}).get('badges', 0) >= 4"
+        },
+        {
+            "id": "FOURTH_GYM_COMPLETE",
+            "description": "Receive Balance Badge (fourth gym badge)",
+            "category": "badge",
+            "condition": "((len(state.get('game', {}).get('badges', [])) >= 4) if isinstance(state.get('game', {}).get('badges', []), list) else state.get('game', {}).get('badges', 0) >= 4) and 'GYM' not in str(state.get('player', {}).get('location', '')).upper()"
+        },
+
+        # Phase 14: Route to Fortree
+        {
+            "id": "ROUTE_119_TO_FOR TREE",
+            "description": "Travel via Routes 119 and 120 to Fortree City (via tree top bridge)",
+            "category": "location",
+            "condition": "'FORTREE' in str(state.get('player', {}).get('location', '')).upper()"
+        },
+        {
+            "id": "FORTREE_GYM_ENTERED",
+            "description": "Enter Fortree Gym (bird-themed, high up in trees)",
+            "category": "location",
+            "condition": "'FORTREE_CITY_GYM' in str(state.get('player', {}).get('location', '')).upper() or 'FORTREE GYM' in str(state.get('player', {}).get('location', '')).upper()"
+        },
+
+        # Phase 15: Fifth Gym - Fortree (Winona - Flying)
+        {
+            "id": "WINONA_DEFEATED",
+            "description": "Defeat Gym Leader Winona",
+            "category": "battle",
+            "condition": "(len(state.get('game', {}).get('badges', [])) >= 5) if isinstance(state.get('game', {}).get('badges', []), list) else state.get('game', {}).get('badges', 0) >= 5"
+        },
+        {
+            "id": "FIFTH_GYM_COMPLETE",
+            "description": "Receive Feather Badge (fifth gym badge)",
+            "category": "badge",
+            "condition": "((len(state.get('game', {}).get('badges', [])) >= 5) if isinstance(state.get('game', {}).get('badges', []), list) else state.get('game', {}).get('badges', 0) >= 5) and 'GYM' not in str(state.get('player', {}).get('location', '')).upper()"
+        },
+
+        # Phase 16: Route to Mossdeep
+        {
+            "id": "ROUTE_123_TO_MOSSDEEP",
+            "description": "Travel via Routes 123 and 124 to Mossdeep City",
+            "category": "location",
+            "condition": "'MOSSDEEP' in str(state.get('player', {}).get('location', '')).upper()"
+        },
+        {
+            "id": "MOSSDEEP_GYM_ENTERED",
+            "description": "Enter Mossdeep Gym (space-themed, underwater)",
+            "category": "location",
+            "condition": "'MOSSDEEP_CITY_GYM' in str(state.get('player', {}).get('location', '')).upper() or 'MOSSDEEP GYM' in str(state.get('player', {}).get('location', '')).upper()"
+        },
+
+        # Phase 17: Sixth Gym - Mossdeep (Tate & Liza - Psychic)
+        {
+            "id": "TATE_LIZA_DEFEATED",
+            "description": "Defeat Gym Leaders Tate & Liza (twin gym leaders)",
+            "category": "battle",
+            "condition": "(len(state.get('game', {}).get('badges', [])) >= 6) if isinstance(state.get('game', {}).get('badges', []), list) else state.get('game', {}).get('badges', 0) >= 6"
+        },
+        {
+            "id": "SIXTH_GYM_COMPLETE",
+            "description": "Receive Mind Badge (sixth gym badge)",
+            "category": "badge",
+            "condition": "((len(state.get('game', {}).get('badges', [])) >= 6) if isinstance(state.get('game', {}).get('badges', []), list) else state.get('game', {}).get('badges', 0) >= 6) and 'GYM' not in str(state.get('player', {}).get('location', '')).upper()"
+        },
+
+        # Phase 18: Route to Sootopolis
+        {
+            "id": "ROUTE_126_TO_SOETOPOLIS",
+            "description": "Travel via Routes 126, 127, and 128 to Sootopolis City (requires Surf)",
+            "category": "location",
+            "condition": "'SOETOPOLIS' in str(state.get('player', {}).get('location', '')).upper() or 'SOOTOPOLIS' in str(state.get('player', {}).get('location', '')).upper()"
+        },
+        {
+            "id": "SOETOPOLIS_GYM_ENTERED",
+            "description": "Enter Sootopolis Gym (underwater, water-themed)",
+            "category": "location",
+            "condition": "'SOETOPOLIS_CITY_GYM' in str(state.get('player', {}).get('location', '')).upper() or 'SOOTOPOLIS GYM' in str(state.get('player', {}).get('location', '')).upper()"
+        },
+
+        # Phase 19: Seventh Gym - Sootopolis (Juan - Water)
+        {
+            "id": "JUAN_DEFEATED",
+            "description": "Defeat Gym Leader Juan",
+            "category": "battle",
+            "condition": "(len(state.get('game', {}).get('badges', [])) >= 7) if isinstance(state.get('game', {}).get('badges', []), list) else state.get('game', {}).get('badges', 0) >= 7"
+        },
+        {
+            "id": "SEVENTH_GYM_COMPLETE",
+            "description": "Receive Rain Badge (seventh gym badge)",
+            "category": "badge",
+            "condition": "((len(state.get('game', {}).get('badges', [])) >= 7) if isinstance(state.get('game', {}).get('badges', []), list) else state.get('game', {}).get('badges', 0) >= 7) and 'GYM' not in str(state.get('player', {}).get('location', '')).upper()"
+        },
+
+        # Phase 20: Pokémon League
+        {
+            "id": "ROUTE_TO_LEAGUE",
+            "description": "Travel via Routes 131, 132, and 133 to the Pokémon League",
+            "category": "location",
+            "condition": "'POKEMON_LEAGUE' in str(state.get('player', {}).get('location', '')).upper() or 'HOENN LEAGUE' in str(state.get('player', {}).get('location', '')).upper()"
+        },
+        {
+            "id": "LEAGUE_LOCKER",
+            "description": "Use the League locker to heal and switch Pokemon",
+            "category": "action",
+            "condition": "'POKEMON_LEAGUE' in str(state.get('player', {}).get('location', '')).upper() and 'LOCKER' in str(state.get('game', {}).get('dialog', '')).upper()"
+        },
+
+        # Phase 21: Elite Four
+        {
+            "id": "ELITE_SIDNEY",
+            "description": "Defeat Elite Four member Sidney (Dark type)",
+            "category": "battle",
+            "condition": "'ELITE_FOUR' in str(state.get('player', {}).get('location', '')).upper() and 'SIDNEY' in str(state.get('game', {}).get('dialog', '')).upper()"
+        },
+        {
+            "id": "ELITE_PHOEBE",
+            "description": "Defeat Elite Four member Phoebe (Ghost type)",
+            "category": "battle",
+            "condition": "'ELITE_FOUR' in str(state.get('player', {}).get('location', '')).upper() and 'PHOEBE' in str(state.get('game', {}).get('dialog', '')).upper()"
+        },
+        {
+            "id": "ELITE_GLACIA",
+            "description": "Defeat Elite Four member Glacia (Ice type)",
+            "category": "battle",
+            "condition": "'ELITE_FOUR' in str(state.get('player', {}).get('location', '')).upper() and 'GLACIA' in str(state.get('game', {}).get('dialog', '')).upper()"
+        },
+        {
+            "id": "ELITE_DRAKE",
+            "description": "Defeat Elite Four member Drake (Dragon type)",
+            "category": "battle",
+            "condition": "'ELITE_FOUR' in str(state.get('player', {}).get('location', '')).upper() and 'DRAKE' in str(state.get('game', {}).get('dialog', '')).upper()"
+        },
+
+        # Phase 22: Champion
+        {
+            "id": "CHAMPION_WALLACE",
+            "description": "Defeat Champion Wallace to complete the game!",
+            "category": "battle",
+            "condition": "'CHAMPION' in str(state.get('player', {}).get('location', '')).upper() or 'HALL_OF_FAME' in str(state.get('player', {}).get('location', '')).upper() or 'WALLACE' in str(state.get('game', {}).get('dialog', '')).upper()"
+        },
+        {
+            "id": "GAME_COMPLETE",
+            "description": "Game complete! Hall of Fame achieved.",
+            "category": "system",
+            "condition": "'HALL_OF_FAME' in str(state.get('player', {}).get('location', '')).upper()"
         }
     ]
 

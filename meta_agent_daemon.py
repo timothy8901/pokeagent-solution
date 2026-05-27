@@ -27,13 +27,16 @@ def signal_handler(signum, frame):
     logger.info(f"Received signal {signum}, shutting down gracefully...")
     should_exit = True
 
-def run_daemon(interval_seconds: int = 30, max_validations_per_cycle: int = 20):
+def run_daemon(interval_seconds: int = 30, max_validations_per_cycle: int = 20,
+               provider: str = "openai", model: str = None):
     """
     Run meta-agent validation in a loop
 
     Args:
         interval_seconds: Sleep interval between validation cycles
         max_validations_per_cycle: Max entries to validate per cycle
+        provider: LLM provider ("openai" or "gemini")
+        model: LLM model name (None = provider's default)
     """
     # Register signal handlers
     signal.signal(signal.SIGINT, signal_handler)
@@ -43,11 +46,12 @@ def run_daemon(interval_seconds: int = 30, max_validations_per_cycle: int = 20):
     logger.info("🤖 META-AGENT DAEMON STARTED")
     logger.info(f"   Interval: {interval_seconds} seconds")
     logger.info(f"   Max validations per cycle: {max_validations_per_cycle}")
+    logger.info(f"   Provider: {provider}, Model: {model or 'default'}")
     logger.info("=" * 80)
 
     # Initialize LLM client
     try:
-        llm = SimpleLLMClient(provider="openai", model="gpt-5")
+        llm = SimpleLLMClient(provider=provider, model=model)
         meta_agent = MetaAgent(llm_client=llm)
         logger.info("✅ Meta-agent initialized")
     except Exception as e:
@@ -94,8 +98,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--port",
         type=int,
-        required=True,
-        help="Port number for this daemon instance"
+        default=None,
+        help="Port number used to identify this daemon instance (logs / kill_run.sh)"
     )
     parser.add_argument(
         "--interval",
@@ -109,10 +113,25 @@ if __name__ == "__main__":
         default=20,
         help="Max validations per cycle (default: 20)"
     )
+    parser.add_argument(
+        "--provider",
+        type=str,
+        default="openai",
+        choices=["openai", "gemini"],
+        help="LLM provider to use (default: openai)"
+    )
+    parser.add_argument(
+        "--model",
+        type=str,
+        default=None,
+        help="LLM model name (default: provider's default)"
+    )
 
     args = parser.parse_args()
 
     run_daemon(
         interval_seconds=args.interval,
-        max_validations_per_cycle=args.max_validations
+        max_validations_per_cycle=args.max_validations,
+        provider=args.provider,
+        model=args.model
     )

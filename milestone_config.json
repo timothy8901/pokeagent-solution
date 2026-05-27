@@ -477,6 +477,114 @@
       "max_retries": 15,
       "timeout": 400,
       "stuck_threshold": 10
+    },
+    {
+      "id": "BRAWLY_GYM",
+      "description": "Defeat Brawly (Fighting) at Petalburg Gym and obtain the Knuckle Badge",
+      "starting_state": "milestone_states/STONE_BADGE_completed.state",
+      "max_steps": 500,
+      "max_retries": 10,
+      "timeout": 600,
+      "stuck_threshold": 10
+    },
+    {
+      "id": "DEWFORD_GYM",
+      "description": "Defeat Wattson (Electric) at Dewford Gym and obtain the Dynamo Badge",
+      "starting_state": "milestone_states/BRAWLY_GYM_completed.state",
+      "max_steps": 500,
+      "max_retries": 10,
+      "timeout": 600,
+      "stuck_threshold": 10
+    },
+    {
+      "id": "LAVARIDGE_GYM",
+      "description": "Defeat Flannery (Fire) at Lavaridge Gym and obtain the Heat Badge",
+      "starting_state": "milestone_states/DEWFORD_GYM_completed.state",
+      "max_steps": 600,
+      "max_retries": 10,
+      "timeout": 900,
+      "stuck_threshold": 10
+    },
+    {
+      "id": "NORMAN_GYM",
+      "description": "Defeat Norman (Normal) at Pacifidlog Gym and obtain the Balance Badge",
+      "starting_state": "milestone_states/LAVARIDGE_GYM_completed.state",
+      "max_steps": 600,
+      "max_retries": 10,
+      "timeout": 900,
+      "stuck_threshold": 10
+    },
+    {
+      "id": "FORTREE_GYM",
+      "description": "Defeat Winona (Flying) at Fortree Gym and obtain the Feather Badge",
+      "starting_state": "milestone_states/NORMAN_GYM_completed.state",
+      "max_steps": 600,
+      "max_retries": 10,
+      "timeout": 900,
+      "stuck_threshold": 10
+    },
+    {
+      "id": "MOSSDEEP_GYM",
+      "description": "Defeat Tate & Liza (Psychic) at Mossdeep Gym and obtain the Mind Badge",
+      "starting_state": "milestone_states/FORTREE_GYM_completed.state",
+      "max_steps": 600,
+      "max_retries": 10,
+      "timeout": 900,
+      "stuck_threshold": 10
+    },
+    {
+      "id": "SPOETOPOLIS_GYM",
+      "description": "Defeat Juan (Water) at Sootopolis Gym and obtain the Rain Badge",
+      "starting_state": "milestone_states/MOSSDEEP_GYM_completed.state",
+      "max_steps": 600,
+      "max_retries": 10,
+      "timeout": 900,
+      "stuck_threshold": 10
+    },
+    {
+      "id": "ELITE_SIDNEY",
+      "description": "Defeat Sidney (Dark) at the Elite Four",
+      "starting_state": "milestone_states/SPOETOPOLIS_GYM_completed.state",
+      "max_steps": 400,
+      "max_retries": 10,
+      "timeout": 600,
+      "stuck_threshold": 10
+    },
+    {
+      "id": "ELITE_PHOEBE",
+      "description": "Defeat Phoebe (Ghost) at the Elite Four",
+      "starting_state": "milestone_states/ELITE_SIDNEY_completed.state",
+      "max_steps": 400,
+      "max_retries": 10,
+      "timeout": 600,
+      "stuck_threshold": 10
+    },
+    {
+      "id": "ELITE_GLACIA",
+      "description": "Defeat Glacia (Ice) at the Elite Four",
+      "starting_state": "milestone_states/ELITE_PHOEBE_completed.state",
+      "max_steps": 400,
+      "max_retries": 10,
+      "timeout": 600,
+      "stuck_threshold": 10
+    },
+    {
+      "id": "ELITE_DRAKE",
+      "description": "Defeat Drake (Dragon) at the Elite Four",
+      "starting_state": "milestone_states/ELITE_GLACIA_completed.state",
+      "max_steps": 400,
+      "max_retries": 10,
+      "timeout": 600,
+      "stuck_threshold": 10
+    },
+    {
+      "id": "CHAMPION_WALLACE",
+      "description": "Defeat Champion Wallace to complete the game",
+      "starting_state": "milestone_states/ELITE_DRAKE_completed.state",
+      "max_steps": 600,
+      "max_retries": 10,
+      "timeout": 900,
+      "stuck_threshold": 10
     }
   ]
 }

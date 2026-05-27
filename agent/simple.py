@@ -52,6 +52,16 @@ DEFAULT_HISTORY_DISPLAY_COUNT = 30 # Number of history entries shown to LLM
 DEFAULT_ACTIONS_DISPLAY_COUNT = 40 # Number of recent actions shown to LLM
 DEFAULT_MOVEMENT_MEMORY_CLEAR_INTERVAL = 30  # Clear movement memory after N actions (0 = never clear)
 
+# Valid button tokens the LLM may emit (WAIT = explicit no-op for the agent's decision).
+VALID_ACTIONS = ['A', 'B', 'START', 'SELECT', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'WAIT']
+
+
+def _line_has_action_token(line: str) -> bool:
+    """True if a line contains at least one real action token. Used to skip prose so a
+    lone "A" ("a door", "a NPC") in reasoning text can't be mistaken for a button press."""
+    tokens = line.upper().replace(',', ' ').replace('.', ' ').split()
+    return any(token in VALID_ACTIONS for token in tokens)
+
 def configure_simple_agent_defaults(max_history_entries: int = None, max_recent_actions: int = None, 
                                   history_display_count: int = None, actions_display_count: int = None,
                                   movement_memory_clear_interval: int = None):
@@ -98,6 +108,7 @@ class HistoryEntry:
     context: str  # "overworld", "battle", "menu", "dialogue"
     action_taken: str
     game_state_summary: str
+    raw_action: Optional[str] = None  # First executed direction this step (UP/DOWN/LEFT/RIGHT), else None
 
 @dataclass
 class SimpleAgentState:
@@ -147,7 +158,10 @@ class SimpleAgent:
         
         # Movement memory clearing interval
         self.movement_memory_clear_interval = movement_memory_clear_interval
-        
+
+        # Previous session's journal text (loaded for cross-session continuity)
+        self.previous_journal = ""
+
         # Initialize storyline objectives for Emerald progression
         self._initialize_storyline_objectives()
         
@@ -328,6 +342,62 @@ class SimpleAgent:
                 "objective_type": "badge",
                 "target_value": "Stone Badge",
                 "milestone_id": "FIRST_GYM_COMPLETE"
+            },
+            {
+                "id": "story_second_badge",
+                "description": "Defeat Brawly in Dewford Town for the Knuckle Badge (2nd)",
+                "objective_type": "badge",
+                "target_value": "Knuckle Badge",
+                "milestone_id": "SECOND_BADGE"
+            },
+            {
+                "id": "story_third_badge",
+                "description": "Defeat Wattson in Mauville City for the Dynamo Badge (3rd)",
+                "objective_type": "badge",
+                "target_value": "Dynamo Badge",
+                "milestone_id": "THIRD_BADGE"
+            },
+            {
+                "id": "story_fourth_badge",
+                "description": "Defeat Flannery in Lavaridge Town for the Heat Badge (4th)",
+                "objective_type": "badge",
+                "target_value": "Heat Badge",
+                "milestone_id": "FOURTH_BADGE"
+            },
+            {
+                "id": "story_fifth_badge",
+                "description": "Defeat Norman (Dad) in Petalburg City for the Balance Badge (5th)",
+                "objective_type": "badge",
+                "target_value": "Balance Badge",
+                "milestone_id": "FIFTH_BADGE"
+            },
+            {
+                "id": "story_sixth_badge",
+                "description": "Defeat Winona in Fortree City for the Feather Badge (6th)",
+                "objective_type": "badge",
+                "target_value": "Feather Badge",
+                "milestone_id": "SIXTH_BADGE"
+            },
+            {
+                "id": "story_seventh_badge",
+                "description": "Defeat Tate & Liza in Mossdeep City for the Mind Badge (7th)",
+                "objective_type": "badge",
+                "target_value": "Mind Badge",
+                "milestone_id": "SEVENTH_BADGE"
+            },
+            {
+                "id": "story_eighth_badge",
+                "description": "Defeat Juan in Sootopolis City for the Rain Badge (8th)",
+                "objective_type": "badge",
+                "target_value": "Rain Badge",
+                "milestone_id": "EIGHTH_BADGE"
+            },
+            {
+                "id": "story_hall_of_fame",
+                "description": "Clear Victory Road, defeat the Elite Four and Champion Wallace, and enter the Hall of Fame",
+                "objective_type": "system",
+                "target_value": "Hall of Fame",
+                "milestone_id": "HALL_OF_FAME"
             }
         ]
         
@@ -345,7 +415,7 @@ class SimpleAgent:
             )
             self.state.objectives.append(objective)
 
-        logger.info(f"Initialized {len(storyline_objectives)} storyline objectives for Emerald progression (up to first gym)")
+        logger.info(f"Initialized {len(storyline_objectives)} storyline objectives for Emerald progression (start → Hall of Fame)")
         
     def get_game_context(self, game_state: Dict[str, Any]) -> str:
         """Determine current game context (overworld, battle, menu, dialogue)"""
@@ -794,12 +864,21 @@ EXAMPLE - DO THIS INSTEAD:
 - NPCs can trigger battles or dialogue, which may be useful for objectives
 """
 
+            # Cross-session continuity: surface the previous session's hand-off journal
+            journal_section = ""
+            if getattr(self, "previous_journal", ""):
+                journal_section = (
+                    "\n=== PREVIOUS SESSION JOURNAL (your past self's hand-off — continue from here) ===\n"
+                    f"{self.previous_journal}\n=== END PREVIOUS SESSION JOURNAL ===\n"
+                )
+
             # Create enhanced prompt with objectives, history context and chain of thought request
-            prompt = f"""You are playing as the Protagonist in Pokemon Emerald. Progress quickly to the milestones by balancing exploration and exploitation of things you know, but have fun for the Twitch stream while you do it. 
+            prompt = f"""You are playing as the Protagonist in Pokemon Emerald. Progress quickly to the milestones by balancing exploration and exploitation of things you know, but have fun for the Twitch stream while you do it.
             Based on the current game frame and state information, think through your next move and choose the best button action. 
             If you notice that you are repeating the same action sequences over and over again, you definitely need to try something different since what you are doing is wrong! Try exploring different new areas or interacting with different NPCs if you are stuck.
             
 
+{journal_section}
 RECENT ACTION HISTORY (last {self.actions_display_count} actions):
 {recent_actions_str}
 
@@ -875,30 +954,34 @@ Context: {context} | Coords: {coords} """
             # Extract action(s) from structured response
             actions, reasoning = self._parse_structured_response(response, game_state)
             
-            # Check for failed movement by comparing previous coordinates
+            # Detect whether the PREVIOUS step's move actually failed: if the last action
+            # was a directional move from the overworld and our coordinates haven't changed
+            # since, that tile/direction is blocked. Attribute the failure to the prior
+            # action (not the one we're about to take), and skip non-overworld contexts
+            # (dialogue/battle/menu) where standing still is normal.
             if len(self.state.history) > 0:
-                prev_coords = self.state.history[-1].player_coords
-                if prev_coords and coords:
-                    # If coordinates didn't change and we attempted a movement, record it as failed
-                    if (prev_coords == coords and 
-                        isinstance(actions, list) and len(actions) > 0 and 
-                        actions[0] in ['UP', 'DOWN', 'LEFT', 'RIGHT']):
-                        self.record_failed_movement(coords, actions[0], "movement_blocked")
-                    elif (prev_coords == coords and 
-                          isinstance(actions, str) and 
-                          actions in ['UP', 'DOWN', 'LEFT', 'RIGHT']):
-                        self.record_failed_movement(coords, actions, "movement_blocked")
+                prev = self.state.history[-1]
+                if (prev.context == "overworld" and
+                        prev.raw_action in ('UP', 'DOWN', 'LEFT', 'RIGHT') and
+                        prev.player_coords and coords and
+                        prev.player_coords == coords):
+                    self.record_failed_movement(prev.player_coords, prev.raw_action, "movement_blocked")
 
             # Record this step in history with reasoning
             game_state_summary = self.create_game_state_summary(game_state)
             action_with_reasoning = f"{actions} | Reasoning: {reasoning}" if reasoning else str(actions)
+            # Track the first executed direction so the next step can tell whether this
+            # move was blocked (coords unchanged) and attribute the failure correctly.
+            first_action = (actions[0] if actions else None) if isinstance(actions, list) else actions
+            raw_action = first_action if first_action in ('UP', 'DOWN', 'LEFT', 'RIGHT') else None
             history_entry = HistoryEntry(
                 timestamp=datetime.now(),
                 player_coords=coords,
                 map_id=map_id,
                 context=context,
                 action_taken=action_with_reasoning,
-                game_state_summary=game_state_summary
+                game_state_summary=game_state_summary,
+                raw_action=raw_action
             )
             self.state.history.append(history_entry)
             
@@ -942,16 +1025,15 @@ Context: {context} | Coords: {coords} """
     def _parse_actions(self, response: str, game_state: Dict[str, Any] = None) -> List[str]:
         """Parse action response from LLM into list of valid actions"""
         response_upper = response.upper().strip()
-        valid_actions = ['A', 'B', 'START', 'SELECT', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'WAIT']
-        
+
         # Parse multiple actions (could be comma or space separated)
         actions_found = []
         # Replace commas with spaces for consistent parsing
         response_clean = response_upper.replace(',', ' ').replace('.', ' ')
         tokens = response_clean.split()
-        
+
         for token in tokens:
-            if token in valid_actions:
+            if token in VALID_ACTIONS:
                 actions_found.append(token)
                 if len(actions_found) >= 10:  # Max 10 actions
                     break
@@ -1030,7 +1112,9 @@ Context: {context} | Coords: {coords} """
                     current_section = 'action'
                     # Extract actions from this line
                     action_text = line[7:].strip()  # Remove "ACTION:" prefix
-                    if action_text:  # Only parse if there's content
+                    # Only parse if the line actually holds an action token; otherwise let
+                    # the next line / fallback find it (avoids locking in a default 'A').
+                    if action_text and _line_has_action_token(action_text):
                         actions = self._parse_actions(action_text, game_state)
                 elif line and current_section:
                     # Continue content of current section
@@ -1043,21 +1127,27 @@ Context: {context} | Coords: {coords} """
                     elif current_section == 'reasoning':
                         reasoning += " " + line
                     elif current_section == 'action':
-                        # Additional action parsing from action section content
-                        if line.strip():  # Only process non-empty lines
-                            additional_actions = self._parse_actions(line, game_state)
-                            actions.extend(additional_actions)
-                            if len(actions) >= 10:  # Max 10 actions
-                                actions = actions[:10]
-                                break
-            
+                        # Accept only the first line after "ACTION:" that actually holds
+                        # an action token (covers the case where the action sits on its
+                        # own line). Skip prose so stray tokens — especially a lone "A" —
+                        # can't inject phantom presses.
+                        if not actions and _line_has_action_token(line):
+                            actions = self._parse_actions(line, game_state)
+
             # Process objectives if mentioned
             if objectives_section:
                 self._process_objectives_from_response(objectives_section)
-            
-            # If no actions found in structured format, fall back to parsing entire response
+
+            # Fallback: no parseable ACTION section. Scan lines bottom-up for the last
+            # one that contains a real action token, rather than parsing the whole
+            # response (which would grab stray tokens from the reasoning prose).
             if not actions:
-                actions = self._parse_actions(response, game_state)
+                for fallback_line in reversed(response.split('\n')):
+                    if _line_has_action_token(fallback_line):
+                        actions = self._parse_actions(fallback_line, game_state)
+                        break
+                if not actions:
+                    actions = ['A']
             
             # Create concise reasoning summary
             reasoning_parts = []
@@ -1572,6 +1662,94 @@ Context: {context} | Coords: {coords} """
             "movement_memory_action_counter": self.state.movement_memory_action_counter,
             "movement_memory_clear_interval": self.movement_memory_clear_interval
         }
+
+    def load_session_journal(self, journal_dir: str):
+        """Load the most recent session journal note for cross-session continuity."""
+        self.previous_journal = ""
+        try:
+            import glob
+            if not journal_dir or not os.path.isdir(journal_dir):
+                return
+            notes = sorted(glob.glob(os.path.join(journal_dir, "Session *.md")),
+                           key=os.path.getmtime)
+            if not notes:
+                return
+            with open(notes[-1], "r") as f:
+                content = f.read()
+            # Bound the size so it doesn't dominate the prompt
+            self.previous_journal = content[-4000:]
+            logger.info(f"📖 Loaded previous session journal: {os.path.basename(notes[-1])}")
+        except Exception as e:
+            logger.warning(f"Could not load session journal: {e}")
+
+    def write_session_journal(self, journal_dir: str, game_state: Dict[str, Any] = None,
+                              session_minutes: int = 60):
+        """Write an end-of-session hand-off journal note for the next agent."""
+        try:
+            import glob
+            os.makedirs(journal_dir, exist_ok=True)
+
+            game_state = game_state or {}
+            coords = self.get_player_coords(game_state)
+            location = game_state.get("player", {}).get("location", "Unknown")
+            milestones = game_state.get("milestones", {}) or {}
+            done_ms = [k for k, v in milestones.items()
+                       if isinstance(v, dict) and v.get("completed")]
+            completed = self.get_completed_objectives()
+            active = self.get_active_objectives()
+            recent = self.get_relevant_history_summary("", coords)
+
+            facts = (
+                f"Location: {location}; Coords: {coords}; Steps this session: {self.state.step_counter}\n"
+                f"Completed milestones ({len(done_ms)}): {', '.join(done_ms) if done_ms else 'none'}\n"
+                f"Recently completed objectives: "
+                f"{', '.join(o.description for o in completed[-8:]) if completed else 'none'}\n"
+                f"Current active objectives: "
+                f"{', '.join(o.description for o in active[:8]) if active else 'none'}\n"
+                f"Recent history:\n{recent}\n"
+            )
+            prompt = (
+                f"You are the AI that just played Pokemon Emerald for about {session_minutes} minutes. "
+                "Write a concise hand-off journal for your NEXT session, which resumes from a savestate at "
+                "the same spot. Base it ONLY on these facts (do not invent progress):\n\n"
+                f"{facts}\n"
+                "Respond in markdown with exactly these two sections:\n"
+                "## Accomplished this session\n"
+                "- 3-6 concrete bullets (where you are now, what you achieved).\n"
+                "## Next session priorities (what I'd do with 15-20 more minutes)\n"
+                "- 3-6 specific, actionable bullets: the exact next destination/route, the immediate goal, "
+                "and any obstacle you were stuck on."
+            )
+
+            frame = game_state.get("frame")
+            try:
+                body = self.vlm.get_query(frame, prompt, "journal") if frame is not None else ""
+            except Exception as e:
+                body = f"_(LLM summary unavailable: {e})_"
+            if not body:
+                body = "_(No summary generated.)_"
+
+            n = len(glob.glob(os.path.join(journal_dir, "Session *.md"))) + 1
+            ts = datetime.now().strftime("%Y-%m-%d %H%M")
+            fname = os.path.join(journal_dir, f"Session {n:03d} - {ts}.md")
+            note = (
+                f"---\ntitle: Session {n:03d}\ndate: {ts}\ntype: pokeagent-journal\n---\n\n"
+                f"# Pokémon Emerald — Session {n:03d} ({ts})\n\n"
+                f"{body}\n\n"
+                "---\n## Hard state (for the next agent)\n"
+                f"- Location: {location}\n"
+                f"- Coords: {coords}\n"
+                f"- Steps this session: {self.state.step_counter}\n"
+                f"- Completed milestones: {', '.join(done_ms) if done_ms else 'none'}\n"
+                "- Resume savestate: `.pokeagent_cache/session_latest.state` (run with `--resume`)\n"
+            )
+            with open(fname, "w") as f:
+                f.write(note)
+            logger.info(f"📝 Wrote session journal: {fname}")
+            return fname
+        except Exception as e:
+            logger.error(f"Failed to write session journal: {e}")
+            return None
 
 # Global simple agent instance for backward compatibility with existing multiprocess code
 _global_simple_agent = None

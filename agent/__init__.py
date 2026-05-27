@@ -131,6 +131,20 @@ class Agent:
                 print(f"❌ Agent error: {e}")
                 return None
 
+    def load_session_journal(self, journal_dir):
+        """Load the previous session's journal into the underlying agent, if supported."""
+        impl = getattr(self, 'agent_impl', None)
+        if impl is not None and hasattr(impl, 'load_session_journal'):
+            return impl.load_session_journal(journal_dir)
+        return None
+
+    def write_session_journal(self, journal_dir, game_state, session_minutes=60):
+        """Write an end-of-session journal note via the underlying agent, if supported."""
+        impl = getattr(self, 'agent_impl', None)
+        if impl is not None and hasattr(impl, 'write_session_journal'):
+            return impl.write_session_journal(journal_dir, game_state, session_minutes)
+        return None
+
 
 __all__ = [
     'Agent',

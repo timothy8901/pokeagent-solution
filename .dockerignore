@@ -1,0 +1,9 @@
+# Keep the build context small / avoid baking host-specific cruft into the image.
+.venv
+.venv-x86
+.git
+**/__pycache__
+*.pyc
+*.mp4
+.pokeagent_cache*
+*_backup_*

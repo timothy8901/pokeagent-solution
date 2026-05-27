@@ -3,6 +3,10 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
+# Python interpreter — prefers the project venv, override with: PYTHON=... ./start_all.sh
+PYTHON="${PYTHON:-$SCRIPT_DIR/.venv/bin/python3}"
+[ -x "$PYTHON" ] || PYTHON="python3"
+
 export USE_SUBTASKS=false
 export USE_KNOWLEDGE_BASE=true
 
@@ -38,7 +42,7 @@ export MILESTONE_COMPLETIONS_FILE="milestone_presets/pokedex_received.json"
 
 
 echo "Starting main server..."
-nohup /home/heatz123/anaconda3/envs/pokeagent/bin/python3 -m server.app --port $SERVER_PORT --record --load-state Emerald-GBAdvance/splits/04_rival/04_rival.state > server_${SERVER_PORT}.log 2>&1 &
+nohup "$PYTHON" -m server.app --port $SERVER_PORT --record --load-state Emerald-GBAdvance/splits/04_rival/04_rival.state > server_${SERVER_PORT}.log 2>&1 &
 sleep 2
 
 # Copy maps_knowledge.json to knowledge.json if exists
@@ -50,14 +54,14 @@ if [ -f "maps_knowledge.json" ]; then
 fi
 
 echo "Starting frame server..."
-nohup /home/heatz123/anaconda3/envs/pokeagent/bin/python3 -m server.frame_server --port $FRAME_PORT > frame_server_${FRAME_PORT}.log 2>&1 &
+nohup "$PYTHON" -m server.frame_server --port $FRAME_PORT > frame_server_${FRAME_PORT}.log 2>&1 &
 sleep 2
 
 echo "Starting client..."
-nohup /home/heatz123/anaconda3/envs/pokeagent/bin/python3 code_client.py --port $SERVER_PORT --model $MODEL --delay 1.0 > client_${SERVER_PORT}.log 2>&1 &
+nohup "$PYTHON" code_client.py --port $SERVER_PORT --model $MODEL --delay 1.0 > client_${SERVER_PORT}.log 2>&1 &
 
-# echo "Starting meta-agent daemon..."
-# nohup /home/heatz123/anaconda3/envs/pokeagent/bin/python3 meta_agent_daemon.py --port $SERVER_PORT --interval 30 --max-validations 20 > meta_agent_${SERVER_PORT}.log 2>&1 &
+echo "Starting meta-agent daemon..."
+nohup "$PYTHON" meta_agent_daemon.py --port $SERVER_PORT --interval 30 --max-validations 20 --model "$MODEL" > meta_agent_${SERVER_PORT}.log 2>&1 &
 
 echo ""
 echo "✅ All processes started!"
