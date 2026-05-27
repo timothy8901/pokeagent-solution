@@ -30,7 +30,7 @@ from pathlib import Path
 
 # ── paths ───────────────────────────────────────────────────────────────
 PROJECT_DIR  = Path(__file__).resolve().parent
-VENV_PY      = PROJECT_DIR / ".venv-x86" / "bin" / "python"
+VENV_PY      = PROJECT_DIR / ".venv" / "bin" / "python"
 SESSION_STATE = PROJECT_DIR / ".pokeagent_cache" / "session_latest.state"
 
 

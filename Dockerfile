@@ -4,8 +4,10 @@
 FROM python:3.11-slim
 
 # System libs: opencv needs libGL + glib; tesseract powers OCR dialogue detection.
+# mGBA emulator library for GBA emulation.
 RUN apt-get update && apt-get install -y --no-install-recommends \
         libgl1 libglib2.0-0 tesseract-ocr \
+        libmgba0.10 \
     && rm -rf /var/lib/apt/lists/*
 
 ENV PIP_NO_CACHE_DIR=1 \
